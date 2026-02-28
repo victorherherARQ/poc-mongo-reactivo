@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/poc_reactive?replicaSet=rs0
+
+app:
+  request:
+    timeout-seconds: 60
+
+logging:
+  level:
+    com.example.pocmongoreactivo: DEBUG
