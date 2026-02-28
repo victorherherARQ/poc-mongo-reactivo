@@ -18,6 +18,10 @@ import java.time.Duration;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.match;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
 
+/**
+ * Servicio encargado de la lógica de espera reactiva utilizando MongoDB Change Streams.
+ * Proporciona mecanismos para suscribirse a cambios en tiempo real sobre la base de datos.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

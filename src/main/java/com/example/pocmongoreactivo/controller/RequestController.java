@@ -10,10 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.pocmongoreactivo.repository.PendingRequestRepository;
 
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * Controlador REST imperativo para la gestión de solicitudes.
+ * Expone un endpoint que bloquea el hilo de ejecución hasta que se recibe una notificación
+ * reactiva desde MongoDB (Change Stream).
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/requests")
@@ -21,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 public class RequestController {
 
     private final RequestService requestService;
-    private final com.example.pocmongoreactivo.repository.PendingRequestRepository repository;
+    private final PendingRequestRepository repository;
 
     @Value("${app.request.timeout-seconds:60}")
     private int timeoutSeconds;

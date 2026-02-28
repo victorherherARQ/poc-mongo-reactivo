@@ -59,11 +59,26 @@ $ ./update-mongo.sh 69a35b68ce3c7a2e53d9fb11
 Inmediatamente, el `curl` que estaba esperando recibe la respuesta:
 ```json
 {
-  "id": "69a35b68ce3c7a2e53d9fb11",
+  "id": "69a360100e3c387720f2c0bf",
   "status": "COMPLETED",
   "result": "Respuesta procesada externamente desde script",
-  "createdAt": "2026-02-28T21:17:28.467Z"
+  "createdAt": "2026-02-28T21:37:20.035Z"
 }
+```
+
+## Pruebas Automatizadas
+
+La PoC incluye una suite de pruebas completa:
+
+1. **Pruebas Unitarias**:
+   - `RequestControllerTest`: Verifica el comportamiento del endpoint y el manejo de timeouts.
+   - `RequestServiceTest`: Valida el filtrado reactivo de los Change Streams.
+2. **Pruebas de Integración**:
+   - `RequestIntegrationTest`: Utiliza **Testcontainers** para levantar un MongoDB real en Docker y validar el flujo E2E completo de forma automatizada.
+
+Para ejecutar las pruebas:
+```bash
+mvn test
 ```
 
 ## Configuración de Infraestructura
