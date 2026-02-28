@@ -27,45 +27,37 @@ public class RequestService {
     private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     /**
-     * Crea un documento PENDING en MongoDB y se suscribe al Change Stream
-     * para esperar a que sea actualizado externamente.
+     * Se suscribe al Change Stream para esperar a que un documento específico 
+     * sea actualizado a COMPLETED.
      *
-     * @param timeoutSeconds tiempo máximo de espera en segundos
-     * @return el documento actualizado, o lanza error si se agota el timeout
+     * @param requestId ID del documento a observar
+     * @param timeoutSeconds tiempo máximo de espera
+     * @return el documento actualizado
      */
-    public PendingRequest createAndWaitForUpdate(int timeoutSeconds) {
-        // 1. Insertar documento con estado PENDING (reactivo, bloqueamos para obtener el ID)
-        PendingRequest saved = repository.save(PendingRequest.builder().build())
-                .block(Duration.ofSeconds(5));
-
-        if (saved == null) {
-            throw new RuntimeException("No se pudo insertar el documento en MongoDB");
-        }
-
-        log.info("Documento creado con ID: {} - Escuchando todos los cambios en 'pendingRequests'...", saved.getId());
+    public PendingRequest waitForUpdate(String requestId, int timeoutSeconds) {
+        log.info("Iniciando espera reactiva para ID: {} (timeout: {}s)", requestId, timeoutSeconds);
 
         ChangeStreamOptions options = ChangeStreamOptions.builder()
                 .returnFullDocumentOnUpdate()
                 .build();
 
-        // 3. Escuchar el Change Stream sin filtros de agregación (más robusto para debug/PoC)
+        // Escuchar el Change Stream filtrando por el ID y el estado COMPLETED
         return reactiveMongoTemplate
                 .changeStream("pendingRequests", options, PendingRequest.class)
-                .doOnSubscribe(s -> log.info(">>> SUSCRITO AL CHANGE STREAM - Esperando eventos..."))
+                .doOnSubscribe(s -> log.info(">>> SUSCRITO AL CHANGE STREAM - Esperando evento para ID: {}", requestId))
                 .map(event -> {
-                    log.info("Cambio detectado: operationType={}, status={}, body={}", 
+                    log.info("Cambio detectado en la colección: type={}, status={}, bodyId={}", 
                             event.getOperationType(), 
                             event.getBody() != null ? event.getBody().getStatus() : "null",
-                            event.getBody());
+                            event.getBody() != null ? event.getBody().getId() : "null");
                     return event.getBody();
                 })
-                // Filtramos por ID y estado COMPLETED en el flujo reactivo
                 .filter(doc -> doc != null && 
-                               saved.getId().equals(doc.getId()) && 
+                               requestId.equals(doc.getId()) && 
                                "COMPLETED".equals(doc.getStatus()))
                 .next()
                 .timeout(Duration.ofSeconds(timeoutSeconds))
-                .doOnError(e -> log.error("Error/Timeout para ID {}: {}", saved.getId(), e.getMessage()))
+                .doOnError(e -> log.error("Error/Timeout esperando ID {}: {}", requestId, e.getMessage()))
                 .block();
     }
 }

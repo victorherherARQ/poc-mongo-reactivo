@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 public class RequestController {
 
     private final RequestService requestService;
+    private final com.example.pocmongoreactivo.repository.PendingRequestRepository repository;
 
     @Value("${app.request.timeout-seconds:60}")
     private int timeoutSeconds;
@@ -34,7 +35,14 @@ public class RequestController {
         log.info("Petición recibida - Creando documento y esperando actualización (timeout: {}s)...", timeoutSeconds);
 
         try {
-            PendingRequest result = requestService.createAndWaitForUpdate(timeoutSeconds);
+            // 1. El controlador usa el repositorio directamente para crear el documento PENDING
+            PendingRequest pending = PendingRequest.builder().build();
+            PendingRequest saved = repository.save(pending).block(java.time.Duration.ofSeconds(5));
+            
+            log.info("Documento PENDING creado con ID: {}. Esperando actualización externa...", saved.getId());
+
+            // 2. Llama al servicio para esperar reactivamente
+            PendingRequest result = requestService.waitForUpdate(saved.getId(), timeoutSeconds);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             if (isTimeoutException(e)) {
