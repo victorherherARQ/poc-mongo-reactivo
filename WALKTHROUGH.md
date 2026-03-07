@@ -81,6 +81,20 @@ Para ejecutar las pruebas:
 mvn test
 ```
 
+## Pruebas de Rendimiento (Load Testing)
+
+El sistema se ha validado bajo carga para entender su comportamiento ante la concurrencia:
+
+- **Herramienta**: [k6](https://k6.io/) para la generación de carga parametrizable.
+- **Escenario**: 50 usuarios concurrentes con rampa de subida y bajada.
+- **Automatización**: Dashboards e informes en Markdown generados tras cada ejecución.
+- **Cuello de Botella Identificado**: Tomcat Thread Pool (200 hilos por defecto). Cada petición bloquea un hilo mientras espera la base de datos.
+
+Para lanzar una prueba:
+```bash
+./performance/run-tests.sh
+```
+
 ## Configuración de Infraestructura
 
 El `docker-compose.yml` incluye un healthcheck que inicializa automáticamente el **Replica Set** (`rs0`), permitiendo el uso de Change Streams sin configuración manual adicional.

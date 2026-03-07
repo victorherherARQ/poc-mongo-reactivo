@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Nos movemos a la raiz del proyecto si el script se lanza desde su propia carpeta
+cd "$(dirname "$0")/.." || exit
+
 # Aseguramos que existe el directorio para los reportes
 mkdir -p performance-reports
 

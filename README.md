@@ -67,6 +67,28 @@ Copia el **ID** que aparece en los logs de la aplicación y ejecútalo:
 ```
 
 > El `curl` debería recibir inmediatamente la respuesta con `status: COMPLETED`.
+69: 
+70: ## Pruebas de Rendimiento
+71: 
+72: El proyecto incluye una suite de pruebas de carga con **k6**.
+73: 
+74: ### Ejecución
+75: 
+76: Para lanzar las pruebas parametrizadas y obtener un reporte en Markdown:
+77: 
+78: ```bash
+79: ./performance/run-tests.sh
+80: ```
+81: 
+82: El script solicitará:
+83: - Número de hilos (VUs).
+84: - Tiempo de rampa.
+85: 
+86: Los informes se guardarán automáticamente en `performance-reports/`.
+87: 
+88: > [!NOTE]
+89: > Asegúrate de tener el contenedor de MongoDB y el auto-updater (`./performance/auto-updater.sh`) corriendo antes de iniciar los tests.
+90: 
 
 ## Configuración
 
@@ -79,8 +101,13 @@ Copia el **ID** que aparece en los logs de la aplicación y ejecútalo:
 
 ```
 ├── docker-compose.yml          # MongoDB 7 con replica set
-├── update-mongo.sh             # Script para actualizar documento
+├── update-mongo.sh             # Script para actualizar documento manual
 ├── pom.xml                     # Dependencias Maven
+├── performance-reports/        # Reportes autogenerados (ignorado por git)
+├── performance/                # Suite de pruebas de carga
+│   ├── load-test.js            # Script base de k6
+│   ├── auto-updater.sh         # Script para completar peticiones en bucle
+│   └── run-tests.sh            # Lanzador interactivo
 └── src/main/java/.../
     ├── PocMongoReactivoApplication.java
     ├── model/PendingRequest.java
