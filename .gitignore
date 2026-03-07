@@ -34,3 +34,7 @@ build/
 ### OS ###
 .DS_Store
 Thumbs.db
+
+### Performance Testing ###
+performance/k6-*/
+performance-reports/
